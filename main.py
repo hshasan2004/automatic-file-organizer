@@ -48,18 +48,26 @@ def get_unique_name(destination_path):
 
 def move_file(source_path, folder_path, file):
 
+    if not os.path.exists(source_path):
+        return
+
     os.makedirs(folder_path, exist_ok=True)
 
     destination_path = os.path.join(folder_path, file)
 
     destination_path = get_unique_name(destination_path)
 
-    shutil.move(source_path, destination_path)
+    try:
 
-    final_name = os.path.basename(destination_path)
+        shutil.move(source_path, destination_path)
 
-    print(f"Moved {final_name} to {os.path.basename(folder_path)} folder")
+        final_name = os.path.basename(destination_path)
 
+        print(f"Moved {final_name} to {os.path.basename(folder_path)} folder")
+
+    except Exception as e:
+
+        print(f"Error moving file: {e}")
 
 def organize_file(file_path):
 
@@ -101,11 +109,19 @@ class MyHandler(FileSystemEventHandler):
         if event.is_directory:
             return
 
-        print(f"New file detected: {event.src_path}")
-
         time.sleep(2)
 
         organize_file(event.src_path)
+
+
+    def on_moved(self, event):
+
+        if event.is_directory:
+            return
+
+        time.sleep(2)
+
+        organize_file(event.dest_path)
 
 
 event_handler = MyHandler()
